@@ -5,15 +5,16 @@ import SearchForm from '@/components/SearchForm'
 import Pagination from '@/components/Pagination'
 
 type Props = {
-  searchParams: { city?: string; keyword?: string; specialty?: string; page?: string }
+  searchParams: Promise<{ city?: string; keyword?: string; specialty?: string; page?: string }>
 }
 
 export default async function HomePage({ searchParams }: Props) {
-  const page = Number(searchParams.page ?? 1)
+  const params = await searchParams
+  const page = Number(params.page ?? 1)
   const { advisors, total, pageSize } = await searchAdvisors({
-    city: searchParams.city,
-    keyword: searchParams.keyword,
-    specialty: searchParams.specialty,
+    city: params.city,
+    keyword: params.keyword,
+    specialty: params.specialty,
     page,
   })
   const totalPages = Math.ceil(total / pageSize)
@@ -26,7 +27,7 @@ export default async function HomePage({ searchParams }: Props) {
           <p className="text-hyogo-300 text-xs tracking-widest uppercase mb-2">兵庫県の相続専門家ネットワーク</p>
           <h1 className="font-serif text-3xl font-bold mb-2">相続のプロを、兵庫から探す</h1>
           <p className="text-hyogo-200 text-sm mb-8">地域・専門分野から、あなたに合った相続診断士を検索できます</p>
-          <SearchForm cities={HYOGO_CITIES} specialties={SPECIALTIES} current={searchParams} />
+          <SearchForm cities={HYOGO_CITIES} specialties={SPECIALTIES} current={params} />
         </div>
       </section>
 
@@ -34,7 +35,7 @@ export default async function HomePage({ searchParams }: Props) {
       <section className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-gray-500">
-            {searchParams.city || searchParams.keyword || searchParams.specialty
+            {params.city || params.keyword || params.specialty
               ? `検索結果：${total}名`
               : `兵庫県の相続診断士：${total}名`}
           </p>
@@ -54,7 +55,7 @@ export default async function HomePage({ searchParams }: Props) {
         )}
 
         {totalPages > 1 && (
-          <Pagination currentPage={page} totalPages={totalPages} searchParams={searchParams} />
+          <Pagination currentPage={page} totalPages={totalPages} searchParams={params} />
         )}
       </section>
     </main>
