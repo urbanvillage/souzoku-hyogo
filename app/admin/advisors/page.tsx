@@ -1,9 +1,25 @@
-import { getAllAdvisorsAdmin } from '@/lib/advisors'
+'use client'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PlusCircle, Edit, Trash2 } from 'lucide-react'
+import type { Advisor } from '@/types'
 
-export default async function AdminAdvisorsPage() {
-  const advisors = await getAllAdvisorsAdmin()
+export default function AdminAdvisorsPage() {
+  const [advisors, setAdvisors] = useState<Advisor[]>([])
+
+  async function load() {
+    const res = await fetch('/api/advisors/list')
+    const data = await res.json()
+    setAdvisors(data)
+  }
+
+  useEffect(() => { load() }, [])
+
+  async function handleDelete(id: number, name: string) {
+    if (!confirm(`${name}を削除しますか？`)) return
+    await fetch(`/api/advisors/${id}`, { method: 'DELETE' })
+    load()
+  }
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-8">
@@ -17,7 +33,6 @@ export default async function AdminAdvisorsPage() {
           新規登録
         </Link>
       </div>
-
       <div className="card overflow-hidden p-0">
         <table className="w-full text-sm">
           <thead className="bg-stone-50 border-b border-stone-200">
@@ -54,15 +69,11 @@ export default async function AdminAdvisorsPage() {
                       <Edit size={14} />
                     </Link>
                     <button
-  onClick={async () => {
-    if (!confirm(`${a.name}を削除しますか？`)) return
-    await fetch(`/api/advisors/${a.id}`, { method: 'DELETE' })
-    window.location.reload()
-  }}
-  className="p-1.5 hover:bg-red-100 rounded transition-colors text-gray-400 hover:text-red-500"
->
-  <Trash2 size={14} />
-</button>
+                      onClick={() => handleDelete(a.id, a.name)}
+                      className="p-1.5 hover:bg-red-100 rounded transition-colors text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </td>
               </tr>
