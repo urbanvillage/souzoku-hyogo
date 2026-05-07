@@ -8,7 +8,7 @@ export async function searchAdvisors({ city, keyword, specialty, page = 1 }: Sea
     .from('advisors')
     .select('*', { count: 'exact' })
     .eq('is_published', true)
-    .order('name_kana')
+    .order('sort_order')
 
   if (city) query = query.eq('city', city)
   if (specialty) query = query.contains('specialties', [specialty])

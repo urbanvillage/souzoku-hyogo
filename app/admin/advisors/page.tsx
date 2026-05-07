@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { PlusCircle, Edit, Trash2 } from 'lucide-react'
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
 import type { Advisor } from '@/types'
 
 export default function AdminAdvisorsPage() {
@@ -21,6 +21,32 @@ export default function AdminAdvisorsPage() {
     load()
   }
 
+  async function handleMove(id: number, direction: 'up' | 'down') {
+    const index = advisors.findIndex(a => a.id === id)
+    if (direction === 'up' && index === 0) return
+    if (direction === 'down' && index === advisors.length - 1) return
+
+    const newAdvisors = [...advisors]
+    const swapIndex = direction === 'up' ? index - 1 : index + 1
+    const temp = newAdvisors[index]
+    newAdvisors[index] = newAdvisors[swapIndex]
+    newAdvisors[swapIndex] = temp
+    setAdvisors(newAdvisors)
+
+    await Promise.all([
+      fetch(`/api/advisors/${newAdvisors[index].id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sort_order: index })
+      }),
+      fetch(`/api/advisors/${newAdvisors[swapIndex].id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sort_order: swapIndex })
+      })
+    ])
+  }
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
@@ -37,6 +63,7 @@ export default function AdminAdvisorsPage() {
         <table className="w-full text-sm">
           <thead className="bg-stone-50 border-b border-stone-200">
             <tr>
+              <th className="text-left px-4 py-3 font-medium text-gray-600">順番</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">氏名</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">事務所</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">市区町村</th>
@@ -48,6 +75,16 @@ export default function AdminAdvisorsPage() {
           <tbody>
             {advisors.map((a, i) => (
               <tr key={a.id} className={`border-b border-stone-100 hover:bg-stone-50 ${i % 2 === 0 ? '' : 'bg-stone-50/50'}`}>
+                <td className="px-4 py-3">
+                  <div className="flex flex-col gap-0.5">
+                    <button onClick={() => handleMove(a.id, 'up')} className="hover:bg-stone-200 rounded p-0.5 text-gray-400 hover:text-gray-600">
+                      <ChevronUp size={14} />
+                    </button>
+                    <button onClick={() => handleMove(a.id, 'down')} className="hover:bg-stone-200 rounded p-0.5 text-gray-400 hover:text-gray-600">
+                      <ChevronDown size={14} />
+                    </button>
+                  </div>
+                </td>
                 <td className="px-4 py-3 font-medium">{a.name}</td>
                 <td className="px-4 py-3 text-gray-600">{a.office_name}</td>
                 <td className="px-4 py-3 text-gray-600">{a.city}</td>
