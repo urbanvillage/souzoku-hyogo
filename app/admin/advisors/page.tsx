@@ -53,9 +53,16 @@ export default async function AdminAdvisorsPage() {
                     <Link href={`/admin/advisors/${a.id}`} className="p-1.5 hover:bg-stone-200 rounded transition-colors text-gray-500">
                       <Edit size={14} />
                     </Link>
-                    <button className="p-1.5 hover:bg-red-100 rounded transition-colors text-gray-400 hover:text-red-500">
-                      <Trash2 size={14} />
-                    </button>
+                    <button
+  onClick={async () => {
+    if (!confirm(`${a.name}を削除しますか？`)) return
+    await fetch(`/api/advisors/${a.id}`, { method: 'DELETE' })
+    window.location.reload()
+  }}
+  className="p-1.5 hover:bg-red-100 rounded transition-colors text-gray-400 hover:text-red-500"
+>
+  <Trash2 size={14} />
+</button>
                   </div>
                 </td>
               </tr>

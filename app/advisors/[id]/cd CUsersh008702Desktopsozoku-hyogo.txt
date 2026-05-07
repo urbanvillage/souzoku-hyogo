@@ -1,0 +1,3 @@
+cd C:\Users\h008702\Desktop\sozoku-hyogo
+git remote add origin https://github.com/urbanvillage/souzoku-hyogo.git
+git push -u origin main
