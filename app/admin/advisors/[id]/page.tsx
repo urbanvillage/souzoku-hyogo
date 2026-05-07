@@ -1,14 +1,15 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { HYOGO_CITIES, SPECIALTIES } from '@/types'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import Image from 'next/image'
 
 export default function EditAdvisorPage() {
   const { id } = useParams()
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [form, setForm] = useState<any>(null)
 
   useEffect(() => {
@@ -19,6 +20,18 @@ export default function EditAdvisorPage() {
         if (advisor) setForm(advisor)
       })
   }, [id])
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: formData })
+    const data = await res.json()
+    if (data.url) setForm((f: any) => ({ ...f, photo_url: data.url }))
+    setUploading(false)
+  }
 
   function toggleSpecialty(s: string) {
     setForm((f: any) => ({
@@ -57,6 +70,30 @@ export default function EditAdvisorPage() {
       </Link>
       <h1 className="font-serif text-2xl font-bold mb-6">診断士情報を編集</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        <div className="card space-y-4">
+          <h2 className="font-medium text-gray-700 text-sm uppercase tracking-wide">顔写真</h2>
+          <div className="flex items-center gap-4">
+            {form.photo_url ? (
+              <Image src={form.photo_url} alt="顔写真" width={80} height={80} className="w-20 h-20 rounded-full object-cover" />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-hyogo-100 text-hyogo-800 flex items-center justify-center text-2xl font-medium">
+                {form.name?.charAt(0)}
+              </div>
+            )}
+            <div>
+              <label className="btn-outline cursor-pointer inline-block">
+                {uploading ? 'アップロード中...' : '写真を選択'}
+                <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={uploading} />
+              </label>
+              {form.photo_url && (
+                <button type="button" onClick={() => setForm((f: any) => ({ ...f, photo_url: null }))}
+                  className="ml-2 text-xs text-red-500 hover:underline">削除</button>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="card space-y-4">
           <h2 className="font-medium text-gray-700 text-sm uppercase tracking-wide">基本情報</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -85,6 +122,7 @@ export default function EditAdvisorPage() {
             </div>
           </div>
         </div>
+
         <div className="card space-y-4">
           <h2 className="font-medium text-gray-700 text-sm uppercase tracking-wide">連絡先</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -102,6 +140,7 @@ export default function EditAdvisorPage() {
             </div>
           </div>
         </div>
+
         <div className="card space-y-4">
           <h2 className="font-medium text-gray-700 text-sm uppercase tracking-wide">専門分野</h2>
           <div className="flex flex-wrap gap-2">
@@ -113,6 +152,7 @@ export default function EditAdvisorPage() {
             ))}
           </div>
         </div>
+
         <div className="card space-y-3">
           <h2 className="font-medium text-gray-700 text-sm uppercase tracking-wide">自己紹介</h2>
           <textarea className={`${field} h-32 resize-y`} value={form.profile || ''} onChange={e => setForm((f: any) => ({ ...f, profile: e.target.value }))} />
@@ -121,6 +161,7 @@ export default function EditAdvisorPage() {
             <span>ウェブサイトに公開する</span>
           </label>
         </div>
+
         <div className="flex justify-end gap-3">
           <Link href="/admin/advisors" className="btn-outline">キャンセル</Link>
           <button type="submit" disabled={loading} className="btn-primary">{loading ? '保存中...' : '変更を保存'}</button>
