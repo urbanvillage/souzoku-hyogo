@@ -41,7 +41,7 @@ export async function getAllAdvisorsAdmin() {
   const { data, error } = await client
     .from('advisors')
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('sort_order')
   if (error) throw error
   return data as Advisor[]
 }
