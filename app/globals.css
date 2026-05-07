@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Noto Sans JP', sans-serif;
+    --font-serif: 'Noto Serif JP', serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-hyogo-600 hover:bg-hyogo-800 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors;
+  }
+  .btn-outline {
+    @apply border border-hyogo-600 text-hyogo-600 hover:bg-hyogo-50 text-sm font-medium px-5 py-2 rounded-lg transition-colors;
+  }
+  .card {
+    @apply bg-white border border-stone-200 rounded-xl p-5;
+  }
+  .badge {
+    @apply inline-block text-xs px-2.5 py-0.5 rounded-full bg-hyogo-100 text-hyogo-800;
+  }
+}
