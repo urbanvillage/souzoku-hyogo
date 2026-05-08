@@ -1,6 +1,5 @@
 'use client'
 import { useRouter, usePathname } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
 import { LogOut } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -9,8 +8,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isLoginPage = pathname === '/admin/login'
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    await fetch('/api/auth/logout', { method: 'POST' })
     router.push('/admin/login')
+    router.refresh()
   }
 
   return (
